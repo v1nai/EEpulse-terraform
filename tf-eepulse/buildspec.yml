@@ -1,0 +1,48 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      # Install Terraform using AWS CLI
+      - curl -O https://bootstrap.pypa.io/get-pip.py
+      - python3 get-pip.py --user
+      - pip install git-remote-codecommit
+
+  build:
+    commands:
+      - cd ..
+      - git clone codecommit::$region://com-tf-modules
+      - cd tf-eepulse/env/$region/$path
+      - |
+        TERRAFORM_VERSION="1.1.2"
+        TERRAFORM_URL="https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip"
+        TERRAFORM_DIR="/usr/local/bin"
+
+        curl -O ${TERRAFORM_URL}
+        unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d ${TERRAFORM_DIR}
+        rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+        
+        aws --version
+        
+        ACCOUNT_B_ROLE=$(aws sts assume-role \
+          --role-arn arn:aws:iam::$account:role/ToolsAccount-CrossAccountRole \
+          --role-session-name AssumeRoleSession)
+
+        export AWS_ACCESS_KEY_ID=$(echo $ACCOUNT_B_ROLE | jq -r '.Credentials.AccessKeyId')
+        export AWS_SECRET_ACCESS_KEY=$(echo $ACCOUNT_B_ROLE | jq -r '.Credentials.SecretAccessKey')
+        export AWS_SESSION_TOKEN=$(echo $ACCOUNT_B_ROLE | jq -r '.Credentials.SessionToken')
+
+        terraform --version
+        
+        terraform init -backend-config="bucket=$env-ballotda-$account-tf-state" -backend-config="key=$env/$region/$path/terraform.tfstate" -backend-config="region=$region"  -backend-config="dynamodb_table=$env-eepulse-$account-tf-lock"  -backend-config="encrypt=true" -force-copy -backend=true
+        
+        terraform plan -target="module.vpc" -var-file="$env.tfvars"
+        
+        terraform apply -target="module.vpc" -var-file="$env.tfvars" -auto-approve
+        
+        terraform apply -auto-approve -var-file="$env.tfvars"
+
+  post_build:
+    commands:
+      # Add any post-build cleanup or additional actions if required
+      - echo "Build completed on `date`"
