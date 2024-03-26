@@ -28,7 +28,7 @@ variable "region" {
   type = string
 }
 
-variable "acm_certificate_arn" {}
+# variable "acm_certificate_arn" {}
 variable "key_name" {}
 variable "ec2_ami" {
   default = "ami-0fc5d935ebf8bc3bc"

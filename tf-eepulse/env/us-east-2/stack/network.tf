@@ -5,7 +5,7 @@ module "vpc" {
   project = "${local.project}"
   vpc_name = "${local.env}-vpc"
   vpc_cidr = "${local.vpc_cidr}"
-  az_list = ["us-east-1a","us-east-1b"]
+  az_list = ["us-east-2a","us-east-2b"]
   single_nat_gw = true
   customer = "${local.Customer}"
   common_tags = local.common_tags
@@ -45,11 +45,13 @@ module "alb" {
 }
 
 module "ecs-repo" {
+  for_each = toset(["ps-api" , "psb-api"])
   source = "../../../../com-tf-modules/compute/ecr"
   common_tags = local.common_tags
-  repository_name = "eepulse-php"
+  repository_name = "${local.project}-${each.key}"
   repository_image_tag_mutability = "MUTABLE"
 }
+
 
 module "ecs-cluster" {
   source = "../../../../com-tf-modules/compute/ecs/ecs-cluster"
@@ -57,14 +59,14 @@ module "ecs-cluster" {
   common_tags = local.common_tags
 }
 
-module "efs" {
-  depends_on = [module.vpc]
-  source = "../../../../com-tf-modules/storage/efs"
-  project = "${local.env}-${local.project}"
-  common_tags = local.common_tags
-  mount_targets = "${data.aws_subnet.test_subnet.*.id}"
-  security_groups = [module.alb_sg.albsg_id,module.comm_sg.sg_id]
-}
+# module "efs" {
+#   depends_on = [module.vpc]
+#   source = "../../../../com-tf-modules/storage/efs"
+#   project = "${local.env}-${local.project}"
+#   common_tags = local.common_tags
+#   mount_targets = "${data.aws_subnet.test_subnet.*.id}"
+#   security_groups = [module.alb_sg.albsg_id,module.comm_sg.sg_id]
+# }
 
 module "ecs-service" {
   depends_on = [module.vpc]
@@ -74,14 +76,14 @@ module "ecs-service" {
   common_tags = local.common_tags
   sg_id = module.comm_sg.sg_id
   alb_arn = module.alb.alb_arn
-  #elb_listener_arn = module.alb.lb_listener_arn
+  # elb_listener_arn = module.alb.lb_listener_arn
   ecs_cluster = module.ecs-cluster.ecs_cluster_arn
   iam_roles = [module.iam]
   vpc_id = module.vpc.vpc_id
-  efs_id = module.efs.efs_id
+  # efs_id = module.efs.efs_id
   account_id = local.account_id
   region = local.region
-  certificate_arn = var.acm_certificate_arn
+  # certificate_arn = var.acm_certificate_arn
   ecs_service_desired_count = var.ecs_service_desired_count
   alarm_actions = var.alarm_actions
   task_cpu = var.task_cpu
@@ -100,10 +102,10 @@ module "ecs-service2" {
   ecs_cluster = module.ecs-cluster.ecs_cluster_arn
   iam_roles = [module.iam]
   vpc_id = module.vpc.vpc_id
-  efs_id = module.efs.efs_id
+  # efs_id = module.efs.efs_id
   account_id = local.account_id
   region = local.region
-  certificate_arn = var.acm_certificate_arn
+  # certificate_arn = var.acm_certificate_arn
   ecs_service_desired_count = var.ecs_service_desired_count
   alarm_actions = var.alarm_actions
   task_cpu = var.task_cpu
@@ -111,12 +113,18 @@ module "ecs-service2" {
   
 }
 
-module "s3_bucket" {
-  source = "../../../../com-tf-modules/storage/s3"
-  s3_bucket = "applicatoin_buckets"
-  acl = var.acl
-  common_tags = local.common_tags
-}
+# module "psb_web_s3_bucket" {
+#   source = "../../../../com-tf-modules/storage/s3"
+#   s3_bucket = "${local.env}-${local.project}-surveybuilderweb"
+#   acl = var.acl
+#   common_tags = local.common_tags
+# }
+# module "ps_web_s3_bucket" {
+#   source = "../../../../com-tf-modules/storage/s3"
+#   s3_bucket = "${local.env}-${local.project}-surveyweb"
+#   acl = var.acl
+#   common_tags = local.common_tags
+# }
 
 module "db" {
   depends_on = [module.vpc]

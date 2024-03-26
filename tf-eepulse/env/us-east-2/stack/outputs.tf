@@ -9,6 +9,6 @@ output "comm_sg" {
     value = module.comm_sg.sg_id
 }
 
-output "efs" {
-  value = module.efs.efs_id
-}
+# output "efs" {
+#   value = module.efs.efs_id
+# }

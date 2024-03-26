@@ -15,5 +15,5 @@ variable "common_tags" {
 
 variable "application_s3_bucket" {
   type    = list(string)
-  default = ["angular-bucket-1", "angular-bucket-2"] // Provide additional bucket names here
+  default = ["epsurveyweb", "epsurveybuilderweb"] // Provide additional bucket names here
 }

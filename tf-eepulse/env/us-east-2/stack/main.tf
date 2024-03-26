@@ -12,7 +12,7 @@ terraform {
 
 provider "aws" {
      version = "~> 4.0"
-     region = "us-east-1"
+     region = "us-east-2"
      #allowed_account_ids = ["374562206220"]
 }
 

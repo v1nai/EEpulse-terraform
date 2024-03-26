@@ -76,10 +76,10 @@ variable "ecs_service_desired_count" {
   type = string
 }
 
-variable "ecs_service_count" {
-  type    = number
-  default = 2  # You can adjust this default value as needed
-}
+# variable "ecs_service_count" {
+#   type    = number
+#   default = 1  # You can adjust this default value as needed
+# }
 
 # variable "elb_listener_arn" {
 #   type = string
@@ -90,9 +90,10 @@ variable "assign_public_ip" {
   default = "true"
 }
 variable "aws_region" {
-  default = "us-east-1"
+  default = "us-east-2"
 }
-
+variable "service_name" {
+}
 variable "ecs_cluster" {}
 variable "container_port" {}
 variable "vpc_id" {}
@@ -111,7 +112,7 @@ variable "volumes" {
 }
 
 variable "ssl_policy" {}
-variable "certificate_arn" {}
+# variable "certificate_arn" {}
 
 #Monitoring
 

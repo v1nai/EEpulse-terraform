@@ -49,7 +49,7 @@ resource "aws_s3_bucket_public_access_block" "block-public-access" {
 }
 
 # added for the s3 buckets 
-resource "aws_s3_bucket" "applicatoin_buckets" {
+resource "aws_s3_bucket" "application_buckets" {
   count         = 2 // Creating 2 additional buckets
   bucket        = var.application_s3_bucket[count.index]
   acl           = var.acl

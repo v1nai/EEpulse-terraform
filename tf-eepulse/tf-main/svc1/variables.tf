@@ -25,15 +25,15 @@ variable "sg_id" {}
 variable "ecs_cluster" {}
 variable "iam_roles" {}
 variable "vpc_id" {}
-variable "efs_id" {}
+# variable "efs_id" {}
 variable "account_id" {}
 variable "region" {}
 variable "alb_arn" {}
-variable "certificate_arn" {}
+# variable "certificate_arn" {}
 #test trigger
 variable "ecs_service_desired_count" {}
 
 #  need to modify this also
 variable "ecr_repo" {
-  default = "eepulse-nodejs"
+  default = "ps-api"
 }
